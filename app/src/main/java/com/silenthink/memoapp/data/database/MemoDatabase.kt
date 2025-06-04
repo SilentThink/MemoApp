@@ -6,14 +6,17 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.silenthink.memoapp.data.dao.MemoDao
+import com.silenthink.memoapp.data.dao.UserDao
 import com.silenthink.memoapp.data.model.Memo
+import com.silenthink.memoapp.data.model.User
 import com.silenthink.memoapp.util.DateConverter
 
-@Database(entities = [Memo::class], version = 1, exportSchema = false)
+@Database(entities = [Memo::class, User::class], version = 2, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class MemoDatabase : RoomDatabase() {
 
     abstract fun memoDao(): MemoDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile
@@ -33,4 +36,4 @@ abstract class MemoDatabase : RoomDatabase() {
             }
         }
     }
-} 
+}
