@@ -10,8 +10,10 @@ import com.silenthink.memoapp.databinding.ItemMemoBinding
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class MemoAdapter(private val onItemClick: (Memo) -> Unit) : 
-    ListAdapter<Memo, MemoAdapter.MemoViewHolder>(MemoDiffCallback()) {
+class MemoAdapter(
+    private val onItemClick: (Memo) -> Unit,
+    private val onItemDelete: (Memo) -> Unit
+) : ListAdapter<Memo, MemoAdapter.MemoViewHolder>(MemoDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoViewHolder {
         val binding = ItemMemoBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -53,4 +55,4 @@ class MemoAdapter(private val onItemClick: (Memo) -> Unit) :
             return oldItem == newItem
         }
     }
-} 
+}

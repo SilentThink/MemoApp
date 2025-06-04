@@ -5,13 +5,17 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.silenthink.memoapp.databinding.ActivityMainBinding
 import com.silenthink.memoapp.ui.screen.LoginActivity
 import com.silenthink.memoapp.ui.screen.MemoAdapter
 import com.silenthink.memoapp.ui.screen.MemoDetailActivity
+import com.silenthink.memoapp.ui.screen.SwipeToDeleteCallback
 import com.silenthink.memoapp.ui.viewmodel.MemoViewModel
 import com.silenthink.memoapp.util.SessionManager
 
@@ -40,14 +44,26 @@ class MainActivity : AppCompatActivity() {
         }
         
         // 设置RecyclerView
-        adapter = MemoAdapter { memo ->
-            val intent = Intent(this, MemoDetailActivity::class.java)
-            intent.putExtra(MemoDetailActivity.EXTRA_MEMO_ID, memo.id)
-            startActivity(intent)
-        }
+        adapter = MemoAdapter(
+            onItemClick = { memo ->
+                val intent = Intent(this, MemoDetailActivity::class.java)
+                intent.putExtra(MemoDetailActivity.EXTRA_MEMO_ID, memo.id)
+                startActivity(intent)
+            },
+            onItemDelete = { memo ->
+                showDeleteConfirmDialog(memo)
+            }
+        )
         
         binding.rvMemos.layoutManager = LinearLayoutManager(this)
         binding.rvMemos.adapter = adapter
+        
+        // 设置滑动删除
+        val swipeToDeleteCallback = SwipeToDeleteCallback(adapter, this) { memo ->
+            showDeleteConfirmDialog(memo)
+        }
+        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
+        itemTouchHelper.attachToRecyclerView(binding.rvMemos)
         
         // 初始化ViewModel
         memoViewModel = ViewModelProvider(this)[MemoViewModel::class.java]
@@ -93,5 +109,25 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)
         finish()
+    }
+    
+    private fun showDeleteConfirmDialog(memo: com.silenthink.memoapp.data.model.Memo) {
+        AlertDialog.Builder(this)
+            .setTitle("删除备忘录")
+            .setMessage("确定要删除备忘录 \"${memo.title}\" 吗？")
+            .setPositiveButton("删除") { _, _ ->
+                memoViewModel.delete(memo)
+                Toast.makeText(this, "备忘录已删除", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("取消") { dialog, _ ->
+                dialog.dismiss()
+                // 恢复被滑动的项目
+                adapter.notifyDataSetChanged()
+            }
+            .setOnCancelListener {
+                // 恢复被滑动的项目
+                adapter.notifyDataSetChanged()
+            }
+            .show()
     }
 }
