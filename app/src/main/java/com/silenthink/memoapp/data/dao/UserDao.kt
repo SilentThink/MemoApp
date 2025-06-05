@@ -14,7 +14,8 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE username = :username LIMIT 1")
     suspend fun getUserByUsername(username: String): User?
     
-
+    @Query("SELECT * FROM users ORDER BY createdDate DESC")
+    suspend fun getAllUsersList(): List<User>
     
     @Query("SELECT COUNT(*) FROM users WHERE username = :username")
     suspend fun isUsernameExists(username: String): Int

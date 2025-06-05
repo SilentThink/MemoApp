@@ -96,4 +96,8 @@ interface MemoDao {
     
     @Query("SELECT * FROM memos WHERE category = :category ORDER BY priority ASC, modifiedDate DESC")
     fun getMemosByCategorySortedByPriorityAsc(category: String): LiveData<List<Memo>>
+
+    // 添加同步查询方法，用于备份
+    @Query("SELECT * FROM memos ORDER BY modifiedDate DESC")
+    suspend fun getAllMemosList(): List<Memo>
 } 

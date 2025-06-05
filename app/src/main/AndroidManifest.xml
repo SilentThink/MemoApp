@@ -43,6 +43,13 @@
             android:theme="@style/Theme.MemoApp"
             android:parentActivityName=".MainActivity" />
             
+        <activity
+            android:name=".ui.screen.BackupActivity"
+            android:exported="false"
+            android:label="数据备份与恢复"
+            android:theme="@style/Theme.MemoApp"
+            android:parentActivityName=".MainActivity" />
+            
     </application>
 
 </manifest>
