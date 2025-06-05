@@ -19,13 +19,25 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // 签名配置
+    signingConfigs {
+        create("release") {
+            keyAlias = "memo_app_key"
+            keyPassword = "memo123456"
+            storeFile = file("memo_app_keystore.jks")
+            storePassword = "memo123456"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // 应用签名配置
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

@@ -14,11 +14,11 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     
     private val userRepository: UserRepository
     
-    private val _loginResult = MutableLiveData<Result<User>>()
-    val loginResult: LiveData<Result<User>> = _loginResult
+    private val _loginResult = MutableLiveData<Result<User>?>()
+    val loginResult: LiveData<Result<User>?> = _loginResult
     
-    private val _registerResult = MutableLiveData<Result<Long>>()
-    val registerResult: LiveData<Result<Long>> = _registerResult
+    private val _registerResult = MutableLiveData<Result<Long>?>()
+    val registerResult: LiveData<Result<Long>?> = _registerResult
     
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading

@@ -22,17 +22,17 @@ class BackupViewModel(application: Application) : AndroidViewModel(application) 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
     
-    private val _backupResult = MutableLiveData<Result<String>>()
-    val backupResult: LiveData<Result<String>> = _backupResult
+    private val _backupResult = MutableLiveData<Result<String>?>()
+    val backupResult: LiveData<Result<String>?> = _backupResult
     
-    private val _restoreResult = MutableLiveData<Result<BackupUtils.BackupData>>()
-    val restoreResult: LiveData<Result<BackupUtils.BackupData>> = _restoreResult
+    private val _restoreResult = MutableLiveData<Result<BackupUtils.BackupData>?>()
+    val restoreResult: LiveData<Result<BackupUtils.BackupData>?> = _restoreResult
     
     private val _backupFiles = MutableLiveData<List<BackupUtils.BackupFileInfo>>()
     val backupFiles: LiveData<List<BackupUtils.BackupFileInfo>> = _backupFiles
     
-    private val _deleteResult = MutableLiveData<Result<Boolean>>()
-    val deleteResult: LiveData<Result<Boolean>> = _deleteResult
+    private val _deleteResult = MutableLiveData<Result<Boolean>?>()
+    val deleteResult: LiveData<Result<Boolean>?> = _deleteResult
     
     /**
      * 创建备份
