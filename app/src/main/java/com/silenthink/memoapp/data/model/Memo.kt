@@ -11,5 +11,6 @@ data class Memo(
     val title: String,
     val content: String,
     val createdDate: Date,
-    val modifiedDate: Date
+    val modifiedDate: Date,
+    val imagePath: String? = null
 ) 

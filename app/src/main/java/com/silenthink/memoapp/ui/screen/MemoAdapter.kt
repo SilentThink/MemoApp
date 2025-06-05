@@ -1,12 +1,16 @@
 package com.silenthink.memoapp.ui.screen
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.silenthink.memoapp.data.model.Memo
 import com.silenthink.memoapp.databinding.ItemMemoBinding
+import com.silenthink.memoapp.util.ImageUtils
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -43,6 +47,17 @@ class MemoAdapter(
             
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             binding.tvDate.text = dateFormat.format(memo.modifiedDate)
+            
+            // 显示图片缩略图
+            if (memo.imagePath != null && ImageUtils.imageExists(memo.imagePath)) {
+                binding.ivThumbnail.visibility = View.VISIBLE
+                Glide.with(binding.root.context)
+                    .load(File(memo.imagePath))
+                    .centerCrop()
+                    .into(binding.ivThumbnail)
+            } else {
+                binding.ivThumbnail.visibility = View.GONE
+            }
         }
     }
     

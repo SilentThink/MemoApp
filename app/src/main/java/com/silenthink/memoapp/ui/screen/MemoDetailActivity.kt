@@ -1,13 +1,20 @@
 package com.silenthink.memoapp.ui.screen
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.silenthink.memoapp.databinding.ActivityMemoDetailBinding
 import com.silenthink.memoapp.ui.viewmodel.MemoViewModel
+import com.silenthink.memoapp.util.ImageUtils
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -18,9 +25,19 @@ class MemoDetailActivity : AppCompatActivity() {
     private lateinit var viewModel: MemoViewModel
     private var memoId: Long = 0
     private var isNewMemo = true
+    private var currentImagePath: String? = null
 
     companion object {
         const val EXTRA_MEMO_ID = "extra_memo_id"
+    }
+
+    // 图片选择器
+    private val imagePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            handleImageSelection(it)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +67,16 @@ class MemoDetailActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener {
             saveMemo()
         }
+
+        // 设置图片选择按钮
+        binding.btnSelectImage.setOnClickListener {
+            imagePickerLauncher.launch("image/*")
+        }
+
+        // 设置图片移除按钮
+        binding.btnRemoveImage.setOnClickListener {
+            removeCurrentImage()
+        }
     }
 
     private fun loadMemoData() {
@@ -60,6 +87,10 @@ class MemoDetailActivity : AppCompatActivity() {
                 
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                 binding.tvLastModified.text = "最后修改: ${dateFormat.format(it.modifiedDate)}"
+                
+                // 加载图片
+                currentImagePath = it.imagePath
+                updateImageDisplay()
             }
         }
     }
@@ -74,11 +105,15 @@ class MemoDetailActivity : AppCompatActivity() {
         }
 
         if (isNewMemo) {
-            viewModel.insert(title, content)
+            viewModel.insert(title, content, currentImagePath)
             Toast.makeText(this, "备忘录已保存", Toast.LENGTH_SHORT).show()
         } else {
             viewModel.getMemoById(memoId).value?.let {
-                val updatedMemo = it.copy(title = title, content = content)
+                val updatedMemo = it.copy(
+                    title = title, 
+                    content = content,
+                    imagePath = currentImagePath
+                )
                 viewModel.update(updatedMemo)
                 Toast.makeText(this, "备忘录已更新", Toast.LENGTH_SHORT).show()
             }
@@ -137,5 +172,58 @@ class MemoDetailActivity : AppCompatActivity() {
     private fun getCurrentTimeFormatted(): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         return dateFormat.format(Date())
+    }
+
+    /**
+     * 处理选择的图片
+     */
+    private fun handleImageSelection(uri: Uri) {
+        val savedPath = ImageUtils.saveImageToInternalStorage(this, uri)
+        if (savedPath != null) {
+            // 删除旧图片
+            currentImagePath?.let { ImageUtils.deleteImage(it) }
+            
+            currentImagePath = savedPath
+            updateImageDisplay()
+            Toast.makeText(this, "图片已添加", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "图片添加失败", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * 更新图片显示状态
+     */
+    private fun updateImageDisplay() {
+        if (currentImagePath != null && ImageUtils.imageExists(currentImagePath)) {
+            binding.ivImage.visibility = View.VISIBLE
+            binding.btnRemoveImage.visibility = View.VISIBLE
+            
+            Glide.with(this)
+                .load(File(currentImagePath!!))
+                .centerCrop()
+                .into(binding.ivImage)
+        } else {
+            binding.ivImage.visibility = View.GONE
+            binding.btnRemoveImage.visibility = View.GONE
+            currentImagePath = null
+        }
+    }
+
+    /**
+     * 移除当前图片
+     */
+    private fun removeCurrentImage() {
+        AlertDialog.Builder(this)
+            .setTitle("移除图片")
+            .setMessage("确定要移除这张图片吗？")
+            .setPositiveButton("移除") { _, _ ->
+                currentImagePath?.let { ImageUtils.deleteImage(it) }
+                currentImagePath = null
+                updateImageDisplay()
+                Toast.makeText(this, "图片已移除", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
 } 

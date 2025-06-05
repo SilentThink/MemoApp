@@ -56,13 +56,14 @@ class MemoViewModel(application: Application) : AndroidViewModel(application) {
         _searchQuery.value = ""
     }
 
-    fun insert(title: String, content: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun insert(title: String, content: String, imagePath: String? = null) = viewModelScope.launch(Dispatchers.IO) {
         val currentTime = Date()
         val memo = Memo(
             title = title,
             content = content,
             createdDate = currentTime,
-            modifiedDate = currentTime
+            modifiedDate = currentTime,
+            imagePath = imagePath
         )
         repository.insert(memo)
     }
