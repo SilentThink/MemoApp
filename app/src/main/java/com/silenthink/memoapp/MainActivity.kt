@@ -143,14 +143,14 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun setupSortSpinner() {
-        val sortOptions = CategoryUtils.SortOption.values().map { it.displayName }
+        val sortOptions = CategoryUtils.SortOption.entries.map { it.displayName }
         sortAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, sortOptions)
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerSort.adapter = sortAdapter
         
         // 设置当前选中的排序选项
         val currentSortOption = memoViewModel.getCurrentSortOption()
-        val position = CategoryUtils.SortOption.values().indexOf(currentSortOption)
+        val position = CategoryUtils.SortOption.entries.indexOf(currentSortOption)
         if (position >= 0) {
             binding.spinnerSort.setSelection(position)
         }
@@ -158,7 +158,7 @@ class MainActivity : AppCompatActivity() {
         // 设置排序选择监听器
         binding.spinnerSort.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedSortOption = CategoryUtils.SortOption.values()[position]
+                val selectedSortOption = CategoryUtils.SortOption.entries[position]
                 memoViewModel.setSortOption(selectedSortOption)
             }
             
