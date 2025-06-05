@@ -1,11 +1,18 @@
 package com.silenthink.memoapp.data.repository
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import com.silenthink.memoapp.data.dao.MemoDao
 import com.silenthink.memoapp.data.model.Memo
+import com.silenthink.memoapp.data.model.CategorySuggestion
+import com.silenthink.memoapp.data.service.AiCategoryService
 import com.silenthink.memoapp.util.CategoryUtils
 
-class MemoRepository(private val memoDao: MemoDao) {
+class MemoRepository(
+    private val memoDao: MemoDao,
+    private val context: Context,
+    private val aiCategoryService: AiCategoryService = AiCategoryService(context)
+) {
 
     val allMemos: LiveData<List<Memo>> = memoDao.getAllMemos()
 
@@ -44,6 +51,32 @@ class MemoRepository(private val memoDao: MemoDao) {
     
     fun searchMemosByCategory(category: String, query: String): LiveData<List<Memo>> {
         return memoDao.searchMemosByCategory(category, query)
+    }
+    
+    // AI分类相关方法
+    suspend fun suggestCategory(title: String, content: String): Result<CategorySuggestion> {
+        return aiCategoryService.suggestCategory(title, content)
+    }
+    
+    suspend fun insertWithAiCategory(memo: Memo): Long {
+        // 如果分类是默认值，尝试使用AI推荐分类
+        val finalMemo = if (memo.category == "默认" || memo.category.isBlank()) {
+            try {
+                val suggestion = aiCategoryService.suggestCategory(memo.title, memo.content)
+                if (suggestion.isSuccess) {
+                    memo.copy(category = suggestion.getOrThrow().category)
+                } else {
+                    memo
+                }
+            } catch (e: Exception) {
+                // AI分类失败时使用原始备忘录
+                memo
+            }
+        } else {
+            memo
+        }
+        
+        return memoDao.insertMemo(finalMemo)
     }
     
     // 排序相关方法

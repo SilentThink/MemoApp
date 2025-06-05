@@ -87,6 +87,24 @@ class MemoDetailActivity : AppCompatActivity() {
         binding.btnRemoveImage.setOnClickListener {
             removeCurrentImage()
         }
+        
+        // 设置AI分类建议按钮
+        binding.btnAiSuggest.setOnClickListener {
+            requestAiCategorySuggestion()
+        }
+        
+        // 设置AI建议应用按钮
+        binding.btnApplyAi.setOnClickListener {
+            applyAiSuggestion()
+        }
+        
+        // 设置AI建议忽略按钮
+        binding.btnIgnoreAi.setOnClickListener {
+            hideAiSuggestion()
+        }
+        
+        // 观察AI分类状态
+        setupAiObservers()
     }
 
     private fun setupCategoryDropdown() {
@@ -185,14 +203,6 @@ class MemoDetailActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        if (hasUnsavedChanges()) {
-            showUnsavedChangesDialog()
-        } else {
-            super.onBackPressed()
-        }
-    }
-
     private fun hasUnsavedChanges(): Boolean {
         // 检查是否有未保存的更改
         if (isNewMemo) {
@@ -270,5 +280,62 @@ class MemoDetailActivity : AppCompatActivity() {
         currentImagePath = null
         updateImageDisplay()
         Toast.makeText(this, "图片已移除", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun setupAiObservers() {
+        // 观察AI加载状态
+        viewModel.isAiCategoryLoading.observe(this) { isLoading ->
+            binding.pbAiLoading.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.btnAiSuggest.isEnabled = !isLoading
+        }
+        
+        // 观察AI分类建议
+        viewModel.aiCategorySuggestion.observe(this) { suggestion ->
+            if (suggestion != null) {
+                showAiSuggestion(suggestion)
+            }
+        }
+        
+        // 观察AI错误
+        viewModel.aiCategoryError.observe(this) { error ->
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+                viewModel.clearAiSuggestion()
+            }
+        }
+    }
+    
+    private fun requestAiCategorySuggestion() {
+        val title = binding.etTitle.text.toString().trim()
+        val content = binding.etContent.text.toString().trim()
+        
+        if (title.isEmpty() && content.isEmpty()) {
+            Toast.makeText(this, "请先输入标题或内容", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        viewModel.suggestCategory(title, content)
+    }
+    
+    private fun showAiSuggestion(suggestion: com.silenthink.memoapp.data.model.CategorySuggestion) {
+        binding.cvAiSuggestion.visibility = View.VISIBLE
+        binding.tvAiCategory.text = suggestion.category
+        binding.tvAiConfidence.text = getString(com.silenthink.memoapp.R.string.ai_category_confidence, suggestion.confidence * 100)
+        binding.tvAiReason.text = getString(com.silenthink.memoapp.R.string.ai_category_reason, suggestion.reason)
+    }
+    
+    private fun applyAiSuggestion() {
+        val suggestion = viewModel.aiCategorySuggestion.value
+        if (suggestion != null) {
+            selectedCategory = suggestion.category
+            binding.actvCategory.setText(selectedCategory, false)
+            hideAiSuggestion()
+            Toast.makeText(this, "已应用AI分类建议: ${suggestion.category}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun hideAiSuggestion() {
+        binding.cvAiSuggestion.visibility = View.GONE
+        viewModel.clearAiSuggestion()
     }
 } 

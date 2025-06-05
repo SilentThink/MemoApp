@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">MemoApp</string>
+    
+    <!-- AI分类相关字符串 -->
+    <string name="ai_category_suggestion">AI分类建议</string>
+    <string name="ai_category_loading">正在分析内容…</string>
+    <string name="ai_category_error">AI分类失败</string>
+    <string name="ai_category_apply">采用建议</string>
+    <string name="ai_category_ignore">忽略</string>
+    <string name="ai_category_confidence">置信度: %.0f%%</string>
+    <string name="ai_category_reason">理由: %s</string>
+    <string name="ai_auto_categorize">智能分类</string>
+    <string name="ai_manual_categorize">手动分类</string>
+    <string name="ai_suggest_category">获取AI分类建议</string>
+    
+    <!-- 设置相关字符串 -->
+    <string name="action_ai_settings">AI设置</string>
+    <string name="menu_ai_settings">点击右上角菜单 → AI设置</string>
+    <string name="settings_help">在主界面点击右上角的三点菜单，选择"AI设置"来配置DeepSeek API密钥</string>
 </resources>

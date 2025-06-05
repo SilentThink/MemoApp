@@ -173,6 +173,11 @@ class MainActivity : AppCompatActivity() {
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_ai_settings -> {
+                val intent = Intent(this, com.silenthink.memoapp.ui.screen.SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
             R.id.action_backup -> {
                 val intent = Intent(this, com.silenthink.memoapp.ui.screen.BackupActivity::class.java)
                 startActivity(intent)

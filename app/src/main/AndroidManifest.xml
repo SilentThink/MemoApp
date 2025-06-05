@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -47,6 +50,13 @@
             android:name=".ui.screen.BackupActivity"
             android:exported="false"
             android:label="数据备份与恢复"
+            android:theme="@style/Theme.MemoApp"
+            android:parentActivityName=".MainActivity" />
+            
+        <activity
+            android:name=".ui.screen.SettingsActivity"
+            android:exported="false"
+            android:label="AI设置"
             android:theme="@style/Theme.MemoApp"
             android:parentActivityName=".MainActivity" />
             

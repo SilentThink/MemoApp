@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_ai_settings"
+        android:title="AI设置"
+        android:icon="@android:drawable/ic_menu_preferences"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_backup"
         android:title="数据备份"
         android:icon="@android:drawable/ic_menu_save"

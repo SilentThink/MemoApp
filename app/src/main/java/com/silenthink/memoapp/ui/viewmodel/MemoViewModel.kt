@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.silenthink.memoapp.data.database.MemoDatabase
 import com.silenthink.memoapp.data.model.Memo
+import com.silenthink.memoapp.data.model.CategorySuggestion
 import com.silenthink.memoapp.data.repository.MemoRepository
 import com.silenthink.memoapp.util.CategoryUtils
 import kotlinx.coroutines.Dispatchers
@@ -27,15 +28,26 @@ class MemoViewModel(application: Application) : AndroidViewModel(application) {
     
     private val _categories = MutableLiveData<List<String>>()
     val categories: LiveData<List<String>> = _categories
+    
+    // AI分类相关状态
+    private val _aiCategorySuggestion = MutableLiveData<CategorySuggestion?>()
+    val aiCategorySuggestion: LiveData<CategorySuggestion?> = _aiCategorySuggestion
+    
+    private val _isAiCategoryLoading = MutableLiveData<Boolean>()
+    val isAiCategoryLoading: LiveData<Boolean> = _isAiCategoryLoading
+    
+    private val _aiCategoryError = MutableLiveData<String?>()
+    val aiCategoryError: LiveData<String?> = _aiCategoryError
 
     init {
         val memoDao = MemoDatabase.getDatabase(application).memoDao()
-        repository = MemoRepository(memoDao)
+        repository = MemoRepository(memoDao, application.applicationContext)
         allMemos = repository.allMemos
         
         // 初始化默认值
         _selectedCategory.value = "全部"
         _sortOption.value = CategoryUtils.SortOption.MODIFIED_DATE_DESC
+        _isAiCategoryLoading.value = false
         
         setupObservers()
         loadCategories()
@@ -117,6 +129,32 @@ class MemoViewModel(application: Application) : AndroidViewModel(application) {
         _searchQuery.value = ""
     }
     
+    // AI分类相关方法
+    fun suggestCategory(title: String, content: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isAiCategoryLoading.postValue(true)
+            _aiCategoryError.postValue(null)
+            
+            try {
+                val result = repository.suggestCategory(title, content)
+                if (result.isSuccess) {
+                    _aiCategorySuggestion.postValue(result.getOrThrow())
+                } else {
+                    _aiCategoryError.postValue(result.exceptionOrNull()?.message ?: "AI分类建议获取失败")
+                }
+            } catch (e: Exception) {
+                _aiCategoryError.postValue("网络错误：${e.message}")
+            } finally {
+                _isAiCategoryLoading.postValue(false)
+            }
+        }
+    }
+    
+    fun clearAiSuggestion() {
+        _aiCategorySuggestion.value = null
+        _aiCategoryError.value = null
+    }
+    
     private fun loadCategories() {
         viewModelScope.launch(Dispatchers.IO) {
             val dbCategories = repository.getAllCategories()
@@ -145,6 +183,22 @@ class MemoViewModel(application: Application) : AndroidViewModel(application) {
             priority = priority
         )
         repository.insert(memo)
+        loadCategories() // 重新加载分类
+    }
+    
+    // 使用AI自动分类插入备忘录
+    fun insertWithAiCategory(title: String, content: String, imagePath: String? = null, priority: Int = 0) = viewModelScope.launch(Dispatchers.IO) {
+        val currentTime = Date()
+        val memo = Memo(
+            title = title,
+            content = content,
+            createdDate = currentTime,
+            modifiedDate = currentTime,
+            imagePath = imagePath,
+            category = "默认", // 将由AI服务自动分类
+            priority = priority
+        )
+        repository.insertWithAiCategory(memo)
         loadCategories() // 重新加载分类
     }
 
