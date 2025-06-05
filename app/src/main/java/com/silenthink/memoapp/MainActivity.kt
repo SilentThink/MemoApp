@@ -119,15 +119,19 @@ class MainActivity : AppCompatActivity() {
         
         // 观察分类数据变化
         memoViewModel.categories.observe(this) { categories ->
-            categoryAdapter.clear()
-            categoryAdapter.addAll(categories)
-            categoryAdapter.notifyDataSetChanged()
-            
-            // 设置当前选中的分类
-            val currentCategory = memoViewModel.getCurrentCategory()
-            val position = categories.indexOf(currentCategory)
-            if (position >= 0) {
-                binding.spinnerCategory.setSelection(position)
+            // 检查数据是否真的发生了变化
+            val currentData = (0 until categoryAdapter.count).map { categoryAdapter.getItem(it) ?: "" }
+            if (currentData != categories) {
+                categoryAdapter.clear()
+                categoryAdapter.addAll(categories)
+                categoryAdapter.notifyDataSetChanged()
+                
+                // 设置当前选中的分类
+                val currentCategory = memoViewModel.getCurrentCategory()
+                val position = categories.indexOf(currentCategory)
+                if (position >= 0) {
+                    binding.spinnerCategory.setSelection(position)
+                }
             }
         }
         
@@ -208,12 +212,10 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton("取消") { dialog, _ ->
                 dialog.dismiss()
-                // 恢复被滑动的项目
-                adapter.notifyDataSetChanged()
+                // ListAdapter会自动处理数据变更，无需手动通知
             }
             .setOnCancelListener {
-                // 恢复被滑动的项目
-                adapter.notifyDataSetChanged()
+                // ListAdapter会自动处理数据变更，无需手动通知
             }
             .show()
     }
