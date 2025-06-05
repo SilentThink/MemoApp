@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -14,6 +15,7 @@ import com.bumptech.glide.Glide
 import com.silenthink.memoapp.data.model.Memo
 import com.silenthink.memoapp.databinding.ActivityMemoDetailBinding
 import com.silenthink.memoapp.ui.viewmodel.MemoViewModel
+import com.silenthink.memoapp.util.CategoryUtils
 import com.silenthink.memoapp.util.ImageUtils
 import java.io.File
 import java.text.SimpleDateFormat
@@ -28,6 +30,8 @@ class MemoDetailActivity : AppCompatActivity() {
     private var isNewMemo = true
     private var currentImagePath: String? = null
     private var currentMemo: Memo? = null
+    private var selectedCategory: String = "默认"
+    private var selectedPriority: Int = CategoryUtils.Priority.NORMAL
 
     companion object {
         const val EXTRA_MEMO_ID = "extra_memo_id"
@@ -53,6 +57,10 @@ class MemoDetailActivity : AppCompatActivity() {
 
         // 初始化ViewModel
         viewModel = ViewModelProvider(this)[MemoViewModel::class.java]
+
+        // 设置分类和优先级选择器
+        setupCategoryDropdown()
+        setupPriorityDropdown()
 
         // 检查是否是编辑现有备忘录
         if (intent.hasExtra(EXTRA_MEMO_ID)) {
@@ -81,12 +89,44 @@ class MemoDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupCategoryDropdown() {
+        val categories = CategoryUtils.DEFAULT_CATEGORIES
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, categories)
+        binding.actvCategory.setAdapter(adapter)
+        binding.actvCategory.setText(selectedCategory, false)
+        
+        binding.actvCategory.setOnItemClickListener { _, _, position, _ ->
+            selectedCategory = categories[position]
+        }
+    }
+
+    private fun setupPriorityDropdown() {
+        val priorities = listOf("普通", "重要", "紧急")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, priorities)
+        binding.actvPriority.setAdapter(adapter)
+        binding.actvPriority.setText(CategoryUtils.Priority.getPriorityText(selectedPriority), false)
+        
+        binding.actvPriority.setOnItemClickListener { _, _, position, _ ->
+            selectedPriority = when (position) {
+                1 -> CategoryUtils.Priority.IMPORTANT
+                2 -> CategoryUtils.Priority.URGENT
+                else -> CategoryUtils.Priority.NORMAL
+            }
+        }
+    }
+
     private fun loadMemoData() {
         viewModel.getMemoById(memoId).observe(this) { memo ->
             memo?.let {
                 currentMemo = it
                 binding.etTitle.setText(it.title)
                 binding.etContent.setText(it.content)
+                
+                // 设置分类和优先级
+                selectedCategory = it.category
+                selectedPriority = it.priority
+                binding.actvCategory.setText(selectedCategory, false)
+                binding.actvPriority.setText(CategoryUtils.Priority.getPriorityText(selectedPriority), false)
                 
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                 binding.tvLastModified.text = "最后修改: ${dateFormat.format(it.modifiedDate)}"
@@ -108,14 +148,16 @@ class MemoDetailActivity : AppCompatActivity() {
         }
 
         if (isNewMemo) {
-            viewModel.insert(title, content, currentImagePath)
+            viewModel.insert(title, content, currentImagePath, selectedCategory, selectedPriority)
             Toast.makeText(this, "备忘录已保存", Toast.LENGTH_SHORT).show()
         } else {
             currentMemo?.let {
                 val updatedMemo = it.copy(
                     title = title, 
                     content = content,
-                    imagePath = currentImagePath
+                    imagePath = currentImagePath,
+                    category = selectedCategory,
+                    priority = selectedPriority
                 )
                 viewModel.update(updatedMemo)
                 Toast.makeText(this, "备忘录已更新", Toast.LENGTH_SHORT).show()
@@ -159,7 +201,9 @@ class MemoDetailActivity : AppCompatActivity() {
         } else {
             currentMemo?.let {
                 return it.title != binding.etTitle.text.toString() || 
-                       it.content != binding.etContent.text.toString()
+                       it.content != binding.etContent.text.toString() ||
+                       it.category != selectedCategory ||
+                       it.priority != selectedPriority
             }
         }
         return false
@@ -220,16 +264,11 @@ class MemoDetailActivity : AppCompatActivity() {
      * 移除当前图片
      */
     private fun removeCurrentImage() {
-        AlertDialog.Builder(this)
-            .setTitle("移除图片")
-            .setMessage("确定要移除这张图片吗？")
-            .setPositiveButton("移除") { _, _ ->
-                currentImagePath?.let { ImageUtils.deleteImage(it) }
-                currentImagePath = null
-                updateImageDisplay()
-                Toast.makeText(this, "图片已移除", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("取消", null)
-            .show()
+        currentImagePath?.let { 
+            ImageUtils.deleteImage(it)
+        }
+        currentImagePath = null
+        updateImageDisplay()
+        Toast.makeText(this, "图片已移除", Toast.LENGTH_SHORT).show()
     }
 } 

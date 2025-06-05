@@ -11,7 +11,7 @@ import com.silenthink.memoapp.data.model.Memo
 import com.silenthink.memoapp.data.model.User
 import com.silenthink.memoapp.util.DateConverter
 
-@Database(entities = [Memo::class, User::class], version = 3, exportSchema = false)
+@Database(entities = [Memo::class, User::class], version = 4, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class MemoDatabase : RoomDatabase() {
 

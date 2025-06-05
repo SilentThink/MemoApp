@@ -12,5 +12,7 @@ data class Memo(
     val content: String,
     val createdDate: Date,
     val modifiedDate: Date,
-    val imagePath: String? = null
+    val imagePath: String? = null,
+    val category: String = "默认",
+    val priority: Int = 0
 ) 

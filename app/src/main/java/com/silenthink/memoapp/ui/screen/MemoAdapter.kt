@@ -1,5 +1,6 @@
 package com.silenthink.memoapp.ui.screen
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.silenthink.memoapp.data.model.Memo
 import com.silenthink.memoapp.databinding.ItemMemoBinding
+import com.silenthink.memoapp.util.CategoryUtils
 import com.silenthink.memoapp.util.ImageUtils
 import java.io.File
 import java.text.SimpleDateFormat
@@ -47,6 +49,15 @@ class MemoAdapter(
             
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             binding.tvDate.text = dateFormat.format(memo.modifiedDate)
+            
+            // 显示分类
+            binding.tvCategory.text = memo.category
+            binding.tvCategory.visibility = View.VISIBLE
+            
+            // 显示优先级
+            binding.tvPriority.text = CategoryUtils.Priority.getPriorityText(memo.priority)
+            binding.tvPriority.setTextColor(Color.parseColor(CategoryUtils.Priority.getPriorityColor(memo.priority)))
+            binding.tvPriority.visibility = View.VISIBLE
             
             // 显示图片缩略图
             if (memo.imagePath != null && ImageUtils.imageExists(memo.imagePath)) {
