@@ -1,8 +1,8 @@
-# MemoApp - 安卓备忘录应用
+# MemoApp - 智能安卓备忘录应用
 
 ## 项目概述
 
-MemoApp是一个简洁高效的安卓备忘录应用，提供用户登录、备忘录管理等功能。应用采用MVVM架构模式设计，使用Room数据库存储备忘录信息，SharedPreferences管理用户登录状态，通过ConstraintLayout和RecyclerView构建现代化UI界面。
+MemoApp是一个功能丰富的智能安卓备忘录应用，集成了AI智能分类功能，提供用户登录、备忘录管理、智能分类等功能。应用采用MVVM架构模式设计，使用Room数据库存储备忘录信息，集成DeepSeek AI API实现智能分类，通过现代化UI设计提供优秀的用户体验。
 
 ## 功能特点
 
@@ -11,33 +11,50 @@ MemoApp是一个简洁高效的安卓备忘录应用，提供用户登录、备�
 - 记住登录状态功能
 - 安全登出
 
-### 备忘录管理
+### 智能备忘录管理
 - 查看所有备忘录列表
 - 创建新备忘录
 - 查看/编辑备忘录详情
+- **AI智能分类** - 基于DeepSeek API自动分类备忘录
 - 自动保存修改时间
+- 备忘录搜索功能
 
-### 用户界面
-- 使用ConstraintLayout构建响应式布局
-- 使用RecyclerView高效显示备忘录列表
-- Material Design设计风格
+### 现代化用户界面
+- 混合架构：传统View系统 + Jetpack Compose
+- Material Design 3设计风格
+- 响应式布局设计
 - 流畅的页面过渡和用户交互
+- 优化的列表显示性能
+
+### AI集成功能
+- DeepSeek AI API集成
+- 智能内容分类
+- 自动标签生成
 
 ## 技术架构
 
 ### MVVM架构
 - **Model**: Room数据库实体和数据访问对象
-- **View**: XML布局和Activity/Fragment
+- **View**: XML布局、Activity/Fragment + Jetpack Compose
 - **ViewModel**: 连接UI和数据层的中间件
 
 ### 主要技术栈
-- Kotlin语言
-- Jetpack组件库
+- **开发语言**: Kotlin
+- **UI框架**: 
+  - 传统View系统 (XML布局)
+  - Jetpack Compose (现代声明式UI)
+- **架构组件**:
   - Room: 数据持久化
   - ViewModel: UI状态管理
   - LiveData: 响应式数据更新
-- Material Design组件
-- ViewBinding: 视图绑定
+  - Navigation Components: 页面导航
+- **网络请求**: 
+  - Retrofit2: HTTP客户端
+  - OkHttp3: 网络拦截和日志
+  - Gson: JSON序列化
+- **图片处理**: Glide
+- **AI服务**: DeepSeek API
+- **异步处理**: Kotlin Coroutines
 
 ## 项目结构
 
@@ -45,19 +62,27 @@ MemoApp是一个简洁高效的安卓备忘录应用，提供用户登录、备�
 app/src/main/
 ├── java/com/silenthink/memoapp/
 │   ├── data/
+│   │   ├── api/            # API接口定义
+│   │   │   └── DeepSeekApiService.kt
 │   │   ├── dao/            # 数据访问对象
 │   │   ├── database/       # 数据库配置
 │   │   ├── model/          # 数据模型
-│   │   └── repository/     # 数据仓库
+│   │   ├── repository/     # 数据仓库
+│   │   └── service/        # 业务服务层
+│   │       └── AiCategoryService.kt
 │   ├── ui/
 │   │   ├── screen/         # 界面活动和适配器
+│   │   ├── viewmodel/      # 视图模型
 │   │   ├── theme/          # 主题样式
-│   │   └── viewmodel/      # 视图模型
-│   ├── util/               # 工具类
+│   │   ├── helper/         # UI辅助类
+│   │   └── util/           # UI工具类
+│   ├── util/               # 通用工具类
 │   └── MainActivity.kt     # 主活动
 └── res/
     ├── layout/             # 布局文件
     ├── menu/               # 菜单资源
+    ├── drawable/           # 图片资源
+    ├── anim/               # 动画资源
     └── values/             # 资源文件
 ```
 
@@ -80,27 +105,34 @@ app/src/main/
 - 备忘录详情/编辑页面
 - 菜单和导航
 
-### 里程碑 4: 功能完善 (进行中)
-- 备忘录搜索功能
-- 备忘录分类管理
-- 用户偏好设置
-- UI优化和动画
+### 里程碑 4: AI功能集成 ✅
+- DeepSeek AI API集成
+- 智能分类服务实现
+- AI分类功能界面
+- 网络请求优化
 
-### 里程碑 5: 测试与发布 (计划中)
+### 里程碑 5: 功能完善 (进行中)
+- 备忘录搜索优化
+- 用户偏好设置
+- 数据备份与恢复
+- 性能优化
+
+### 里程碑 6: 测试与发布 (计划中)
 - 单元测试
 - UI测试
-- 性能优化
+- 性能测试
 - 应用发布
 
 ## 使用方法
 
 ### 安装
 1. 克隆仓库到本地
-   ```
+   ```bash
    git clone https://github.com/yourusername/MemoApp.git
    ```
 2. 使用Android Studio打开项目
-3. 构建并运行应用
+3. 配置DeepSeek API密钥（如需使用AI功能）
+4. 构建并运行应用
 
 ### 登录
 - 用户名: `admin`
@@ -111,26 +143,65 @@ app/src/main/
 - 点击主页面右下角的"+"按钮添加新备忘录
 - 点击列表中的备忘录项查看/编辑详情
 - 在详情页面修改内容后点击"保存"按钮
+- 使用AI分类功能自动为备忘录分类
 - 通过菜单中的"登出"选项退出应用
 
 ## 开发环境
 
-- Android Studio Hedgehog | 2023.1.1
-- Kotlin 1.9.0
-- Gradle 8.0
-- minSdkVersion 30
-- targetSdkVersion 35
+- **Android Studio**: Hedgehog | 2023.1.1 或更高版本
+- **Kotlin**: 1.9.0+
+- **Gradle**: 8.11.1
+- **Java**: 11
+- **minSdkVersion**: 30
+- **targetSdkVersion**: 35
+- **compileSdkVersion**: 35
 
 ## 项目依赖
 
-- AndroidX Core: 1.12.0
-- AndroidX AppCompat: 1.6.1
-- Material Components: 1.11.0
-- ConstraintLayout: 2.1.4
-- RecyclerView: 1.3.2
-- Room: 2.6.1
-- Lifecycle Components: 2.7.0
-- Navigation Components: 2.7.6
+### 核心依赖
+- AndroidX Core KTX: 最新版本
+- AndroidX Lifecycle Runtime KTX: 最新版本
+- AndroidX Activity Compose: 最新版本
+
+### UI框架
+- **Jetpack Compose BOM**: 最新版本
+- **传统View系统**:
+  - AndroidX AppCompat: 1.6.1
+  - Material Components: 1.11.0
+  - ConstraintLayout: 2.1.4
+  - RecyclerView: 1.3.2
+  - CardView: 1.0.0
+
+### 架构组件
+- **Navigation Components**: 2.7.6
+- **Room Database**: 2.6.1
+- **Lifecycle Components**: 2.7.0
+
+### 网络和数据处理
+- **Retrofit2**: 2.9.0
+- **OkHttp3**: 4.12.0
+- **Gson**: 2.10.1
+- **Kotlin Coroutines**: 1.7.3
+
+### 图片处理
+- **Glide**: 4.16.0
+
+### 测试框架
+- JUnit
+- AndroidX Test
+- Espresso
+
+## AI功能配置
+
+### DeepSeek API设置
+1. 获取DeepSeek API密钥
+2. 在项目中配置API密钥
+3. 确保网络权限已添加到AndroidManifest.xml
+
+### AI分类功能
+- 自动分析备忘录内容
+- 智能生成分类标签
+- 支持自定义分类规则
 
 ## Commit 提交规范
 
@@ -154,7 +225,7 @@ app/src/main/
 
 ### 提交示例
 
-```
+```bash
 ✨ feat: 添加用户登录功能
 🐛 fix: 修复备忘录列表不刷新的问题
 📝 docs: 更新README文档
