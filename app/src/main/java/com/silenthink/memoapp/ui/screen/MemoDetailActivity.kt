@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.silenthink.memoapp.data.model.Memo
 import com.silenthink.memoapp.databinding.ActivityMemoDetailBinding
 import com.silenthink.memoapp.ui.viewmodel.MemoViewModel
 import com.silenthink.memoapp.util.ImageUtils
@@ -26,6 +27,7 @@ class MemoDetailActivity : AppCompatActivity() {
     private var memoId: Long = 0
     private var isNewMemo = true
     private var currentImagePath: String? = null
+    private var currentMemo: Memo? = null
 
     companion object {
         const val EXTRA_MEMO_ID = "extra_memo_id"
@@ -82,6 +84,7 @@ class MemoDetailActivity : AppCompatActivity() {
     private fun loadMemoData() {
         viewModel.getMemoById(memoId).observe(this) { memo ->
             memo?.let {
+                currentMemo = it
                 binding.etTitle.setText(it.title)
                 binding.etContent.setText(it.content)
                 
@@ -108,7 +111,7 @@ class MemoDetailActivity : AppCompatActivity() {
             viewModel.insert(title, content, currentImagePath)
             Toast.makeText(this, "备忘录已保存", Toast.LENGTH_SHORT).show()
         } else {
-            viewModel.getMemoById(memoId).value?.let {
+            currentMemo?.let {
                 val updatedMemo = it.copy(
                     title = title, 
                     content = content,
@@ -116,6 +119,9 @@ class MemoDetailActivity : AppCompatActivity() {
                 )
                 viewModel.update(updatedMemo)
                 Toast.makeText(this, "备忘录已更新", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Toast.makeText(this, "更新失败：数据未加载完成", Toast.LENGTH_SHORT).show()
+                return
             }
         }
         
@@ -151,7 +157,7 @@ class MemoDetailActivity : AppCompatActivity() {
             return binding.etTitle.text.toString().isNotEmpty() || 
                    binding.etContent.text.toString().isNotEmpty()
         } else {
-            viewModel.getMemoById(memoId).value?.let {
+            currentMemo?.let {
                 return it.title != binding.etTitle.text.toString() || 
                        it.content != binding.etContent.text.toString()
             }
