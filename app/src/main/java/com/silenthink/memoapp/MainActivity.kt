@@ -68,8 +68,8 @@ class MainActivity : AppCompatActivity() {
         // 初始化ViewModel
         memoViewModel = ViewModelProvider(this)[MemoViewModel::class.java]
         
-        // 观察备忘录数据变化
-        memoViewModel.allMemos.observe(this) { memos ->
+        // 观察备忘录数据变化 - 使用displayedMemos而不是allMemos
+        memoViewModel.displayedMemos.observe(this) { memos ->
             adapter.submitList(memos)
             
             // 显示或隐藏空视图
@@ -81,6 +81,18 @@ class MainActivity : AppCompatActivity() {
                 binding.rvMemos.visibility = View.VISIBLE
             }
         }
+        
+        // 设置搜索功能
+        binding.searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+            
+            override fun onQueryTextChange(newText: String?): Boolean {
+                memoViewModel.search(newText ?: "")
+                return true
+            }
+        })
         
         // 设置添加按钮点击事件
         binding.fabAddMemo.setOnClickListener {

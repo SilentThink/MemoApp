@@ -28,4 +28,7 @@ interface MemoDao {
 
     @Query("DELETE FROM memos WHERE id = :memoId")
     suspend fun deleteMemoById(memoId: Long)
+
+    @Query("SELECT * FROM memos WHERE title LIKE '%' || :searchQuery || '%' OR content LIKE '%' || :searchQuery || '%' ORDER BY modifiedDate DESC")
+    fun searchMemos(searchQuery: String): LiveData<List<Memo>>
 } 

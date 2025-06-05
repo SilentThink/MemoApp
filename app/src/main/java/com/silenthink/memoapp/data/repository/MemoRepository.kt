@@ -27,4 +27,8 @@ class MemoRepository(private val memoDao: MemoDao) {
     fun getMemoById(id: Long): LiveData<Memo> {
         return memoDao.getMemoById(id)
     }
+
+    fun searchMemos(query: String): LiveData<List<Memo>> {
+        return memoDao.searchMemos(query)
+    }
 } 
